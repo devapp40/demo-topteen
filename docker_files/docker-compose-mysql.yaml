@@ -1,0 +1,21 @@
+services:
+  mariadb:
+    image: mariadb:10.4
+    container_name: topteenmariadb
+    environment:
+      MARIADB_ROOT_PASSWORD: rootpassword
+      MARIADB_DATABASE: topteen12
+      MARIADB_USER: root12
+      MARIADB_PASSWORD: root12
+    ports:
+      - "3306:3306"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+      - ./custom.cnf:/etc/mysql/conf.d/custom.cnf
+    networks:
+      - topteen-network
+volumes:
+  mariadb_data:
+networks:
+  topteen-network:
+    driver: bridge
