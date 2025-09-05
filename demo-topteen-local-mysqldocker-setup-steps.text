@@ -1,0 +1,103 @@
+pyenv versions
+pyenv global 3.10.13
+
+
+python3 -m venv ../demotopteensenv 
+source ../demotopteensenv/bin/activate
+mkdir django
+cd django
+git clone https://github.com/topteen77/demo-topteens.git
+cd demo-topteens/
+ pip install --upgrade pip
+pip install --no-cache-dir -r requirements.txt
+
+#Docker container for mariadb 10.4
+cd docker_files/
+docker-compose -f docker-compose-mysql.yaml up --build -d
+
+cd ..
+python3 manage.py makemigrations  # Maria DB 10.4 required for installation
+python3 manage.py migrate
+python manage.py createsuperuser
+python manage.py runserver 0.0.0.0:8000 
+pip freeze > requirements-pip_freeze.txt
+
+
+#Docker container for mariadb 10.4
+cd docker_files/
+docker-compose -f docker-compose-mysql.yaml up --build -d
+docker-compose -f docker-compose-mysql.yaml down
+docker-compose down --remove-orphans
+
+
+#docker exec -it docker_files_mariadb_1 bash
+docker exec -it topteenmariadb bash
+
+docker exec -it topteenmariadb mysql -u root -p
+
+
+#set previliges in mysql
+docker exec -it topteenmariadb mysql -u root12 -p
+
+#find and replace in topteen12.sql file:
+utf8mb4_0900_ai_ci 
+utf8mb4_unicode_ci
+
+#copy db to container and import
+docker cp topteen12.sql topteenmariadb:./topteen12.sql
+mysql -u root12 -p topteen12 < topteen12.sql
+
+CREATE USER IF NOT EXISTS 'ajay'@'localhost' IDENTIFIED BY 'ajay@12';
+GRANT ALL PRIVILEGES ON unis_inner.* TO 'ajay'@'localhost' IDENTIFIED BY 'ajay@12';
+
+SHOW DATABASES;
+SELECT User, Host FROM mysql.user;
+CREATE USER IF NOT EXISTS 'root12'@'localhost' IDENTIFIED BY 'your_password';
+GRANT ALL PRIVILEGES ON topteen12.* TO 'root12'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;
+
+#run docker container name topteenmariadb
+docker run -d --name docker_files_mariadb_1 -p 3306:3306 mariadb:10.2
+docker run -d --name topteenmariadb -p 3306:3306 mariadb:10.2
+
+mysql -u root -h 127.0.0.1 -P 3309
+
+
+
+mysql -u root12 -p -h topteenmariadb -P 3306
+ 1984  mysql -u root
+ 1985  sudo mysql -u root
+
+
+Changes done in project file:
+=============================
+1. Update requirements.txt:
+django-ckeditor-5==0.2.13  # Latest version as of now
+2. careers/models.py
+class Career(models.Model):
+    videos = models.ManyToManyField(Video)  # Remove null=True
+
+3. settings.py
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'topteen12',
+        'USER':'root',
+        'PASSWORD':'rootpassword',
+        'HOST': '127.0.0.1',
+        'PORT':'3306',
+        'OPTIONS': {
+            'charset': 'utf8mb4',      # Ensure UTF-8 support
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",  # Ensure Django compatibility
+        },
+    }
+}
+-try:
+-    from topteens.local_settings import *
+-except ImportError:
+-    pass
++# try:
++#     from topteens.local_settings import *
++# except ImportError:
++#     pass
